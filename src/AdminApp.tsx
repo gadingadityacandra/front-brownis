@@ -37,6 +37,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const [editSender, setEditSender] = useState('')
   const [editMessage, setEditMessage] = useState('')
   const [editAutoDelete, setEditAutoDelete] = useState(true)
+  
+  // Media edit states
+  const [editChangeMedia, setEditChangeMedia] = useState(false)
+  const [editMediaType, setEditMediaType] = useState<'video' | 'image' | 'youtube'>('video')
+  const [editMediaFile, setEditMediaFile] = useState<File | null>(null)
+  const [editYoutubeUrl, setEditYoutubeUrl] = useState('')
 
   // Fetch all messages when switching to list tab
   useEffect(() => {
@@ -144,22 +150,36 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     setEditSender(msg.sender)
     setEditMessage(msg.message)
     setEditAutoDelete(msg.auto_delete)
+    setEditChangeMedia(false)
+    setEditMediaType('video')
+    setEditMediaFile(null)
+    setEditYoutubeUrl('')
   }
 
   const saveEdit = async (id: string) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const formData = new FormData()
+      formData.append('recipient', editRecipient)
+      formData.append('sender', editSender)
+      formData.append('message', editMessage)
+      formData.append('auto_delete', editAutoDelete.toString())
+
+      if (editChangeMedia) {
+        formData.append('media_type', editMediaType)
+        if ((editMediaType === 'video' || editMediaType === 'image') && editMediaFile) {
+          formData.append('media_file', editMediaFile)
+        } else if (editMediaType === 'youtube' && editYoutubeUrl) {
+          formData.append('media_link', editYoutubeUrl)
+        } else {
+          alert('File media atau link YouTube wajib diisi jika opsi ganti media diaktifkan!')
+          return
+        }
+      }
+
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          recipient: editRecipient,
-          sender: editSender,
-          message: editMessage,
-          auto_delete: editAutoDelete
-        })
+        body: formData
       })
       if (response.ok) {
         alert('Perubahan berhasil disimpan!')
@@ -431,6 +451,30 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                         <input type="text" value={editSender} onChange={e => setEditSender(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Pengirim"/>
                         <textarea value={editMessage} onChange={e => setEditMessage(e.target.value)} className="w-full p-2 border rounded-lg text-sm" rows={2}></textarea>
                         
+                        <div className="bg-orange-50/50 p-3 rounded-lg border border-orange-100/50">
+                          <label className="flex items-center gap-2 cursor-pointer mb-2">
+                            <input type="checkbox" checked={editChangeMedia} onChange={(e) => setEditChangeMedia(e.target.checked)} className="rounded text-[#5C4033] focus:ring-[#5C4033]" />
+                            <span className="text-sm font-semibold text-[#8B5A2B]">Ganti Media (Opsional)</span>
+                          </label>
+                          
+                          {editChangeMedia && (
+                            <div className="mt-3 space-y-3 animate-fade-in-up">
+                              <div className="grid grid-cols-3 gap-2">
+                                {(["video", "image", "youtube"] as const).map((type) => (
+                                  <button key={type} onClick={() => setEditMediaType(type)} className={`py-1.5 rounded-lg text-xs font-bold transition-all ${editMediaType === type ? 'bg-[#5C4033] text-white' : 'bg-white text-[#A47B8E] border border-[#F3E1E4]'}`}>
+                                    {type === 'video' ? 'Video' : type === 'image' ? 'Gambar' : 'YouTube'}
+                                  </button>
+                                ))}
+                              </div>
+                              {editMediaType === 'youtube' ? (
+                                <input type="url" value={editYoutubeUrl} onChange={e => setEditYoutubeUrl(e.target.value)} className="w-full p-2 text-sm border rounded-lg" placeholder="https://youtube.com/..." />
+                              ) : (
+                                <input type="file" accept={editMediaType === 'video' ? 'video/*' : 'image/*'} onChange={e => e.target.files && setEditMediaFile(e.target.files[0])} className="w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#F3E1E4] file:text-[#5C4033]" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+
                         <div className="flex items-center gap-2 pt-1 pb-1">
                            <input type="checkbox" id="edit-autodelete" checked={editAutoDelete} onChange={(e) => setEditAutoDelete(e.target.checked)} className="rounded text-[#5C4033] focus:ring-[#5C4033]" />
                            <label htmlFor="edit-autodelete" className="text-xs text-gray-700 font-medium cursor-pointer">Hapus Otomatis (7 Hari)</label>
