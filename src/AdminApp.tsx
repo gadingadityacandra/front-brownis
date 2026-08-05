@@ -47,7 +47,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const fetchMessagesList = async () => {
     setIsLoadingList(true)
     try {
-      const response = await fetch(`http://${window.location.hostname}:3000/api/messages`)
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/messages`)
       const result = await response.json()
       if (response.ok) {
         setMessagesList(result.data || [])
@@ -79,7 +80,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         formData.append('media_link', youtubeUrl)
       }
 
-      const backendUrl = `http://${window.location.hostname}:3000/api/messages`;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const backendUrl = `${apiUrl}/api/messages`;
       const response = await fetch(backendUrl, {
         method: 'POST',
         body: formData,
@@ -92,7 +94,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       }
       
       const newId = result.data.id;
-      const publicUrl = `http://${window.location.hostname}:5173/pesan/${newId}`; 
+      const publicUrl = `${window.location.origin}/pesan/${newId}`; 
       
       setQrCodeData(publicUrl);
       setQrCodeRecipient(recipient);
@@ -118,7 +120,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     if (!confirm('Apakah Anda yakin ingin menghapus pesanan ini? File media juga akan dihapus dari server.')) return;
     
     try {
-      const response = await fetch(`http://${window.location.hostname}:3000/api/messages/${id}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'DELETE'
       })
       if (response.ok) {
@@ -143,7 +146,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
   const saveEdit = async (id: string) => {
     try {
-      const response = await fetch(`http://${window.location.hostname}:3000/api/messages/${id}`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -169,7 +173,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   }
 
   const showQRForExisting = (id: string, rec: string) => {
-    const publicUrl = `http://${window.location.hostname}:5173/pesan/${id}`;
+    const publicUrl = `${window.location.origin}/pesan/${id}`;
     setQrCodeData(publicUrl);
     setQrCodeRecipient(rec);
     setActiveTab('create');

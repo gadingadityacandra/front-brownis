@@ -33,7 +33,8 @@ export default function MessageView() {
   useEffect(() => {
     const fetchMessage = async () => {
       try {
-        const backendUrl = `http://${window.location.hostname}:3000/api/messages/${id}`;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const backendUrl = `${apiUrl}/api/messages/${id}`;
         const response = await fetch(backendUrl)
         const result = await response.json()
         
