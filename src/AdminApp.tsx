@@ -328,7 +328,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                             className="hidden" 
                           />
                           <span className={`text-sm font-medium capitalize ${mediaType === type ? 'text-[#5C4033]' : 'text-[#A47B8E]'}`}>
-                            {type === 'image' ? 'Gambar' : type}
+                            {type === 'image' ? 'Gambar' : type === 'youtube' ? 'Link / URL' : type}
                           </span>
                         </label>
                       ))}
@@ -358,7 +358,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                     {mediaType === 'youtube' && (
                       <input 
                         type="url" 
-                        placeholder="https://www.youtube.com/watch?v=..."
+                        placeholder="Masukkan link (YouTube, TikTok, Drive, dll)..."
                         value={youtubeUrl}
                         onChange={(e) => setYoutubeUrl(e.target.value)}
                         className="w-full px-5 py-3 rounded-xl bg-white border border-[#D4A5A5] focus:outline-none focus:ring-2 focus:ring-[#D4A5A5] transition-all text-sm"
