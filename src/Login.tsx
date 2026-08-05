@@ -13,7 +13,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
     setIsLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const backendUrl = `${apiUrl}/api/admin/login`
       const response = await fetch(backendUrl, {
         method: 'POST',

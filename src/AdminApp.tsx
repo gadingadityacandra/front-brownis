@@ -47,7 +47,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const fetchMessagesList = async () => {
     setIsLoadingList(true)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const response = await fetch(`${apiUrl}/api/messages`)
       const result = await response.json()
       if (response.ok) {
@@ -80,7 +80,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         formData.append('media_link', youtubeUrl)
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const backendUrl = `${apiUrl}/api/messages`;
       const response = await fetch(backendUrl, {
         method: 'POST',
