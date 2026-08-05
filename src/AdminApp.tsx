@@ -461,13 +461,13 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                             <div className="mt-3 space-y-3 animate-fade-in-up">
                               <div className="grid grid-cols-3 gap-2">
                                 {(["video", "image", "youtube"] as const).map((type) => (
-                                  <button key={type} onClick={() => setEditMediaType(type)} className={`py-1.5 rounded-lg text-xs font-bold transition-all ${editMediaType === type ? 'bg-[#5C4033] text-white' : 'bg-white text-[#A47B8E] border border-[#F3E1E4]'}`}>
-                                    {type === 'video' ? 'Video' : type === 'image' ? 'Gambar' : 'YouTube'}
+                                  <button key={type} onClick={(e) => { e.preventDefault(); setEditMediaType(type); }} className={`py-2 rounded-xl text-xs font-bold transition-all ${editMediaType === type ? 'bg-[#5C4033] text-white shadow-md' : 'bg-white text-[#A47B8E] border border-[#F3E1E4] hover:bg-[#FDFBF7]'}`}>
+                                    {type === 'video' ? 'Video' : type === 'image' ? 'Gambar' : 'Link / URL'}
                                   </button>
                                 ))}
                               </div>
                               {editMediaType === 'youtube' ? (
-                                <input type="url" value={editYoutubeUrl} onChange={e => setEditYoutubeUrl(e.target.value)} className="w-full p-2 text-sm border rounded-lg" placeholder="https://youtube.com/..." />
+                                <input type="url" value={editYoutubeUrl} onChange={e => setEditYoutubeUrl(e.target.value)} className="w-full p-3 border border-[#F3E1E4] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#5C4033] focus:border-transparent transition-all bg-[#FDFBF7]" placeholder="Masukkan link YouTube, TikTok, Drive, dll (https://...)" required />
                               ) : (
                                 <input type="file" accept={editMediaType === 'video' ? 'video/*' : 'image/*'} onChange={e => e.target.files && setEditMediaFile(e.target.files[0])} className="w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#F3E1E4] file:text-[#5C4033]" />
                               )}

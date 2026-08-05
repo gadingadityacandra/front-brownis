@@ -195,17 +195,25 @@ export default function MessageView() {
             )}
 
             {data.media_type === 'youtube' && (
-              <div className="relative rounded-[1.5rem] overflow-hidden w-full mx-auto aspect-video shadow-md border border-gray-100 bg-gray-50">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={getYoutubeEmbedUrl(data.media_url) || data.media_url} 
-                  title="YouTube video player" 
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                  className="w-full h-full"
-                ></iframe>
+              <div className="w-full mx-auto">
+                {getYoutubeEmbedUrl(data.media_url) ? (
+                  <div className="relative rounded-[1.5rem] overflow-hidden aspect-video shadow-md border border-gray-100 bg-gray-50">
+                    <iframe 
+                      width="100%" 
+                      height="100%" 
+                      src={getYoutubeEmbedUrl(data.media_url)} 
+                      title="YouTube video player" 
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen
+                      className="w-full h-full"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <a href={data.media_url} target="_blank" rel="noreferrer" className="block w-full text-center bg-[#F3E1E4] text-[#5C4033] py-4 rounded-2xl font-bold hover:bg-[#D4A5A5] hover:text-white transition-all shadow-sm border border-[#D4A5A5]">
+                    🔗 Buka Link Spesial
+                  </a>
+                )}
               </div>
             )}
             
