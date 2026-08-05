@@ -36,6 +36,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const [editRecipient, setEditRecipient] = useState('')
   const [editSender, setEditSender] = useState('')
   const [editMessage, setEditMessage] = useState('')
+  const [editAutoDelete, setEditAutoDelete] = useState(true)
 
   // Fetch all messages when switching to list tab
   useEffect(() => {
@@ -142,6 +143,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     setEditRecipient(msg.recipient)
     setEditSender(msg.sender)
     setEditMessage(msg.message)
+    setEditAutoDelete(msg.auto_delete)
   }
 
   const saveEdit = async (id: string) => {
@@ -155,7 +157,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         body: JSON.stringify({
           recipient: editRecipient,
           sender: editSender,
-          message: editMessage
+          message: editMessage,
+          auto_delete: editAutoDelete
         })
       })
       if (response.ok) {
@@ -427,6 +430,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                         <input type="text" value={editRecipient} onChange={e => setEditRecipient(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Penerima"/>
                         <input type="text" value={editSender} onChange={e => setEditSender(e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Pengirim"/>
                         <textarea value={editMessage} onChange={e => setEditMessage(e.target.value)} className="w-full p-2 border rounded-lg text-sm" rows={2}></textarea>
+                        
+                        <div className="flex items-center gap-2 pt-1 pb-1">
+                           <input type="checkbox" id="edit-autodelete" checked={editAutoDelete} onChange={(e) => setEditAutoDelete(e.target.checked)} className="rounded text-[#5C4033] focus:ring-[#5C4033]" />
+                           <label htmlFor="edit-autodelete" className="text-xs text-gray-700 font-medium cursor-pointer">Hapus Otomatis (7 Hari)</label>
+                        </div>
+
                         <div className="flex gap-2">
                           <button onClick={() => saveEdit(msg.id)} className="bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium">Simpan</button>
                           <button onClick={() => setEditingId(null)} className="bg-gray-300 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium">Batal</button>
