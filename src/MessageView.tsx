@@ -261,6 +261,10 @@ export default function MessageView() {
             </svg>
           </a>
         </div>
+        
+        <p className="mt-6 text-xs text-[#A47B8E]/80 font-medium tracking-wide">
+          &copy; 2026 Iam Brownies. All rights reserved.
+        </p>
       </footer>
     </div>
   )

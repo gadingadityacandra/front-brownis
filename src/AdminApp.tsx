@@ -528,6 +528,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
           </div>
         )}
       </div>
+
+      <footer className="mt-12 text-center pb-4 animate-fade-in-up">
+        <p className="text-xs text-[#A47B8E]/80 font-medium tracking-wide">
+          &copy; 2026 Iam Brownies. All rights reserved.
+        </p>
+      </footer>
     </div>
   )
 }
