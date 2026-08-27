@@ -42,7 +42,8 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-6 selection:bg-[#F3E1E4] selection:text-[#5C4033]">
       <div className="w-full max-w-md">
-        <div className="text-center mb-10 animate-fade-in-up">
+        <div className="text-center mb-10 animate-fade-in-up flex flex-col items-center">
+          <img src="/logo.png" alt="Iam Brownies Logo" className="h-20 md:h-28 w-auto mb-4 drop-shadow-md" />
           <h1 className="text-[#5C4033] text-4xl font-extrabold tracking-tight mb-2 drop-shadow-sm">
             Iam Brownies
           </h1>

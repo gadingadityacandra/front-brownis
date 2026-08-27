@@ -26,8 +26,9 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null)
   const [qrCodeRecipient, setQrCodeRecipient] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
-  // States for List
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
+  const [uploadedMediaUrl, setUploadedMediaUrl] = useState('')
   const [messagesList, setMessagesList] = useState<MessageData[]>([])
   const [isLoadingList, setIsLoadingList] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -51,6 +52,63 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     }
   }, [activeTab])
 
+  // Auto-upload media file when selected
+  useEffect(() => {
+    if (!mediaFile) {
+      setUploadStatus('idle');
+      setUploadProgress(0);
+      setUploadedMediaUrl('');
+      return;
+    }
+    
+    setUploadStatus('uploading');
+    setUploadProgress(0);
+    setUploadedMediaUrl('');
+
+    const formData = new FormData();
+    formData.append('media_file', mediaFile);
+
+    const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const uploadUrl = `${apiUrl}/api/upload`;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadUrl);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percentComplete);
+      }
+    };
+
+    xhr.onload = () => {
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setUploadedMediaUrl(res.url);
+          setUploadStatus('success');
+        } else {
+          setUploadStatus('error');
+          alert(res.error || 'Gagal mengunggah file media');
+        }
+      } catch (e) {
+        setUploadStatus('error');
+        alert('Response dari server tidak valid saat mengunggah');
+      }
+    };
+
+    xhr.onerror = () => {
+      setUploadStatus('error');
+      alert('Terjadi kesalahan jaringan saat mengunggah file');
+    };
+
+    xhr.send(formData);
+
+    return () => {
+      xhr.abort();
+    };
+  }, [mediaFile]);
+
   const fetchMessagesList = async () => {
     setIsLoadingList(true)
     try {
@@ -71,6 +129,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if ((mediaType === 'video' || mediaType === 'image') && mediaFile && uploadStatus !== 'success') {
+      alert('Tunggu hingga proses upload file selesai terlebih dahulu!');
+      return;
+    }
+
     setIsLoading(true)
     
     try {
@@ -81,14 +145,16 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       formData.append('media_type', mediaType)
       formData.append('auto_delete', autoDelete.toString())
       
-      if ((mediaType === 'video' || mediaType === 'image') && mediaFile) {
-        formData.append('media_file', mediaFile)
+      if ((mediaType === 'video' || mediaType === 'image') && uploadedMediaUrl) {
+        // Kirim url hasil upload sebelumnya
+        formData.append('media_link', uploadedMediaUrl)
       } else if (mediaType === 'youtube' && youtubeUrl) {
         formData.append('media_link', youtubeUrl)
       }
 
       const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const backendUrl = `${apiUrl}/api/messages`;
+      
       const response = await fetch(backendUrl, {
         method: 'POST',
         body: formData,
@@ -110,7 +176,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       setRecipient('')
       setSender('')
       setMessage('')
-      setMediaFile(null)
+      setMediaFile(null) // Ini akan memicu reset status di useEffect auto-upload
       setYoutubeUrl('')
       setAutoDelete(true)
       
@@ -234,9 +300,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       <div className="max-w-4xl mx-auto animate-fade-in-up">
         
         <header className="bg-white/70 backdrop-blur-md text-[#5C4033] p-6 rounded-3xl mb-8 shadow-sm border border-white flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-            <p className="text-[#A47B8E] font-medium text-sm">iam Brownies • jadi makin sayang </p>
+          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
+            <img src="/logo.png" alt="Iam Brownies" className="h-12 md:h-16 w-auto drop-shadow-sm" />
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+              <p className="text-[#A47B8E] font-medium text-sm">iam Brownies • jadi makin sayang </p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex bg-[#F3E1E4]/50 p-1 rounded-full shadow-inner flex-wrap justify-center">
@@ -348,8 +417,50 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                           />
                         </label>
                         {mediaFile && (
-                          <div className="mt-3 px-3 py-1 bg-[#F3E1E4] rounded-full text-xs font-medium text-[#5C4033] max-w-[200px] truncate">
-                            {mediaFile.name}
+                          <div className="w-full flex flex-col items-center mt-3">
+                            <div className="flex items-center gap-2 max-w-full">
+                              <div className="px-3 py-1 bg-[#F3E1E4] rounded-full text-xs font-medium text-[#5C4033] max-w-[200px] truncate" title={mediaFile.name}>
+                                {mediaFile.name}
+                              </div>
+                              {!isLoading && uploadStatus !== 'success' && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.preventDefault(); setMediaFile(null); setUploadStatus('idle'); }}
+                                  className="p-1 text-[#A47B8E] hover:text-[#E1306C] hover:bg-[#F3E1E4] rounded-full transition-colors flex-shrink-0"
+                                  title="Hapus file"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                            
+                              <div className="w-full max-w-[200px] mt-3 animate-fade-in-up">
+                                <div className={`flex justify-between text-[10px] font-semibold mb-1 ${
+                                  uploadStatus === 'error' ? 'text-red-500' :
+                                  uploadStatus === 'success' ? 'text-green-600' :
+                                  'text-[#8B5A2B]'
+                                }`}>
+                                  <span>
+                                    {uploadStatus === 'error' ? 'Gagal diunggah!' :
+                                     uploadStatus === 'success' ? 'Sukses Upload File' :
+                                     uploadStatus === 'idle' ? 'Menyiapkan...' :
+                                     uploadProgress === 100 ? 'Memproses...' : 'Mengunggah...'}
+                                  </span>
+                                  <span>{uploadStatus === 'success' ? '100' : uploadProgress}%</span>
+                                </div>
+                                <div className={`w-full rounded-full h-1.5 overflow-hidden ${uploadStatus === 'error' ? 'bg-red-100' : uploadStatus === 'success' ? 'bg-green-100' : 'bg-[#F3E1E4]'}`}>
+                                  <div 
+                                    className={`h-full rounded-full transition-all duration-300 ease-out ${
+                                      uploadStatus === 'error' ? 'bg-red-500' :
+                                      uploadStatus === 'success' ? 'bg-green-500' :
+                                      'bg-[#D4A5A5]'
+                                    }`} 
+                                    style={{ width: uploadStatus === 'success' ? '100%' : `${uploadProgress}%` }}
+                                  ></div>
+                                </div>
+                              </div>
                           </div>
                         )}
                       </div>
@@ -384,10 +495,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
                   <button 
                     type="submit" 
-                    disabled={isLoading}
+                    disabled={isLoading || (mediaFile !== null && uploadStatus !== 'success')}
                     className="w-full bg-[#5C4033] hover:bg-[#4A332A] text-white font-bold py-4 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg shadow-[#5C4033]/20 flex justify-center items-center disabled:opacity-70 disabled:hover:scale-100"
                   >
-                    {isLoading ? 'Menyimpan & Mengunggah...' : 'Buat Pesanan Kado'}
+                    {isLoading ? 'Menyimpan...' : 
+                     (mediaFile !== null && uploadStatus !== 'success') ? 'Menunggu Upload Selesai...' :
+                     'Buat Pesanan Kado'}
                   </button>
 
                 </form>

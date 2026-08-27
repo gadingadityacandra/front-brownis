@@ -25,7 +25,7 @@ export default function MessageView() {
   const [data, setData] = useState<MessageData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Animation states
   const [isOpened, setIsOpened] = useState(false)
   const [isOpening, setIsOpening] = useState(false)
@@ -37,11 +37,11 @@ export default function MessageView() {
         const backendUrl = `${apiUrl}/api/messages/${id}`;
         const response = await fetch(backendUrl)
         const result = await response.json()
-        
+
         if (!response.ok) {
           throw new Error(result.error || 'Pesan tidak ditemukan')
         }
-        
+
         setData(result.data)
       } catch (err: any) {
         setError(err.message)
@@ -56,7 +56,7 @@ export default function MessageView() {
   const handleOpenGift = () => {
     if (isOpening || isOpened) return;
     setIsOpening(true);
-    
+
     // Ledakan Confetti!
     confetti({
       particleCount: 150,
@@ -65,12 +65,12 @@ export default function MessageView() {
       colors: ['#5C4033', '#8B5A2B', '#D4A5A5', '#F3E1E4', '#A47B8E'],
       zIndex: 100
     });
-    
+
     // Wait for animation to finish before showing actual message
     setTimeout(() => {
       setIsOpened(true);
       setIsOpening(false);
-    }, 700); 
+    }, 700);
   }
 
   if (isLoading) {
@@ -101,10 +101,14 @@ export default function MessageView() {
   if (!isOpened) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center overflow-hidden relative selection:bg-transparent cursor-pointer" onClick={handleOpenGift}>
-        
+
         {/* Floating background blobs */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#F3E1E4] opacity-40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#E6D0D4] opacity-30 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+
+        <div className="absolute top-8 md:top-12 left-1/2 -translate-x-1/2 z-20 animate-fade-in-up">
+          <img src="/logo.png" alt="Iam Brownies" className="h-16 md:h-20 w-auto object-contain drop-shadow-md" />
+        </div>
 
         <div className={`z-10 flex flex-col items-center transition-all ${isOpening ? 'animate-gift-open-out' : 'animate-gift-bounce'}`}>
           <div className="relative">
@@ -114,7 +118,7 @@ export default function MessageView() {
             </svg>
             <div className="absolute top-1/2 left-1/2 w-40 h-40 bg-white/20 rounded-full blur-xl -translate-x-1/2 -translate-y-1/2 -z-10"></div>
           </div>
-          
+
           <div className="mt-8 text-center bg-white/70 backdrop-blur-md px-8 py-4 rounded-[2rem] shadow-sm border border-white">
             <h2 className="text-2xl font-extrabold text-[#5C4033] mb-1">Ada Sesuatu Buat Kamu!</h2>
             <p className="text-[#A47B8E] font-medium text-sm animate-pulse">Ketuk untuk membuka</p>
@@ -127,16 +131,12 @@ export default function MessageView() {
   // === The Main Message Screen (After Opening) ===
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-gray-800 font-sans p-4 md:p-8 flex flex-col items-center selection:bg-[#F3E1E4] selection:text-[#5C4033]">
-      
+
       <main className="w-full max-w-2xl mx-auto animate-fade-in-up flex-1 flex flex-col justify-center py-8">
-        
+
         {/* Floating Header */}
-        <header className="bg-white/80 backdrop-blur-md text-[#5C4033] p-6 rounded-[2rem] mb-6 shadow-sm border border-white text-center">
-          <div className="w-12 h-12 bg-[#F3E1E4] text-[#5C4033] rounded-full flex items-center justify-center mx-auto mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-            </svg>
-          </div>
+        <header className="bg-white/80 backdrop-blur-md text-[#5C4033] p-6 rounded-[2rem] mb-6 shadow-sm border border-white text-center flex flex-col items-center">
+          <img src="/logo.png" alt="Iam Brownies" className="h-16 md:h-20 w-auto mb-4 drop-shadow-sm" />
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1 text-[#5C4033]">
             Halo, {data.recipient}!
           </h1>
@@ -147,15 +147,15 @@ export default function MessageView() {
 
         {/* Message Card */}
         <div className="glass-card p-6 md:p-10 rounded-[2.5rem] shadow-[0_15px_40px_rgb(92,64,51,0.05)] border border-white/60 mb-6 relative overflow-hidden">
-          
+
           {/* Subtle decoration inside card */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#F3E1E4] opacity-30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-          
+
           <div className="relative z-10">
             <p className="text-[#5C4033] text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium">
               "{data.message}"
             </p>
-            
+
             <div className="mt-8 text-right flex flex-col items-end">
               <p className="text-[#A47B8E] text-sm font-medium mb-0.5">Dari:</p>
               <p className="text-[#8B5A2B] font-bold text-xl">{data.sender}</p>
@@ -166,7 +166,7 @@ export default function MessageView() {
         {/* Media Card */}
         {data.media_url && (
           <div className="glass-card p-4 md:p-6 rounded-[2.5rem] shadow-[0_15px_40px_rgb(92,64,51,0.05)] border border-white/60 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            
+
             <div className="flex items-center justify-center mb-4">
               <span className="text-xs font-bold text-[#A47B8E] uppercase tracking-widest bg-[#F3E1E4]/50 px-4 py-1.5 rounded-full">
                 Media Spesial
@@ -175,9 +175,9 @@ export default function MessageView() {
 
             {data.media_type === 'image' && (
               <div className="relative rounded-[1.5rem] overflow-hidden w-full mx-auto border border-[#F3E1E4]">
-                <img 
-                  src={data.media_url} 
-                  alt="Special Gift" 
+                <img
+                  src={data.media_url}
+                  alt="Special Gift"
                   className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700"
                 />
               </div>
@@ -185,9 +185,9 @@ export default function MessageView() {
 
             {data.media_type === 'video' && (
               <div className="relative rounded-[1.5rem] overflow-hidden bg-black aspect-[9/16] w-full max-w-[350px] mx-auto shadow-md border border-gray-100">
-                <video 
-                  src={data.media_url} 
-                  controls 
+                <video
+                  src={data.media_url}
+                  controls
                   className="w-full h-full object-cover"
                   playsInline
                 />
@@ -198,25 +198,28 @@ export default function MessageView() {
               <div className="w-full mx-auto">
                 {getYoutubeEmbedUrl(data.media_url) ? (
                   <div className="relative rounded-[1.5rem] overflow-hidden aspect-video shadow-md border border-gray-100 bg-gray-50">
-                    <iframe 
-                      width="100%" 
-                      height="100%" 
-                      src={getYoutubeEmbedUrl(data.media_url) || ''} 
-                      title="YouTube video player" 
-                      frameBorder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={getYoutubeEmbedUrl(data.media_url) || ''}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       className="w-full h-full"
                     ></iframe>
                   </div>
                 ) : (
-                  <a href={data.media_url} target="_blank" rel="noreferrer" className="block w-full text-center bg-[#F3E1E4] text-[#5C4033] py-4 rounded-2xl font-bold hover:bg-[#D4A5A5] hover:text-white transition-all shadow-sm border border-[#D4A5A5]">
-                    🔗 Buka Link Spesial
+                  <a href={data.media_url} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#F3E1E4] text-[#5C4033] py-4 rounded-2xl font-bold hover:bg-[#D4A5A5] hover:text-white transition-all shadow-sm border border-[#D4A5A5]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                    </svg>
+                    Buka Link Spesial
                   </a>
                 )}
               </div>
             )}
-            
+
           </div>
         )}
 
@@ -241,12 +244,12 @@ export default function MessageView() {
         {/* Social Contacts */}
         <div className="flex items-center justify-center gap-6 text-[#A47B8E]">
           {/* WhatsApp */}
-          <a href="#" aria-label="WhatsApp" className="hover:text-[#25D366] transition-colors transform hover:scale-110">
+          <a href="https://wa.me/6285790229813?text=Halo%20kak!%20Saya%20tertarik%20untuk%20pesan%20Iam%20Brownies.%20Boleh%20minta%20info%20lebih%20lanjut%20untuk%20order%3F" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="hover:text-[#25D366] transition-colors transform hover:scale-110">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path fillRule="evenodd" d="M12.007 2C6.48 2 2 6.48 2 12.008c0 1.756.455 3.411 1.272 4.856L2 22l5.253-1.238A9.957 9.957 0 0012.007 22c5.527 0 10.007-4.48 10.007-10.007S17.534 2 12.007 2zM17.06 14.86c-.274.773-1.573 1.488-2.185 1.547-.611.059-1.282.176-3.32-1.002-2.038-1.178-3.411-3.235-3.529-3.411-.118-.177-.825-1.12-.825-2.122 0-1.002.522-1.493.714-1.728.192-.236.417-.294.557-.294.14 0 .28.001.404.007.13.006.31-.05.485.372.182.441.603 1.474.655 1.58.053.106.088.23.018.371-.07.142-.106.23-.212.35-.106.117-.225.26-.317.348-.106.106-.217.218-.1.424.118.206.526.87 1.127 1.41.776.697 1.433.914 1.633 1.02.2.106.318.089.435-.047.118-.136.505-.591.643-.79.138-.198.275-.164.455-.098.182.065 1.157.545 1.354.643.197.098.328.147.377.23.048.082.048.472-.226 1.245z" clipRule="evenodd" />
             </svg>
           </a>
-          
+
           {/* Instagram */}
           <a href="https://www.instagram.com/iam.browniesss" aria-label="Instagram" className="hover:text-[#E1306C] transition-colors transform hover:scale-110">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -261,7 +264,7 @@ export default function MessageView() {
             </svg>
           </a>
         </div>
-        
+
         <p className="mt-6 text-xs text-[#A47B8E]/80 font-medium tracking-wide">
           &copy; 2026 Iam Brownies. All rights reserved.
         </p>
