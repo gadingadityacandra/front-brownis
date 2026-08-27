@@ -605,7 +605,9 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                             <h3 className="font-bold text-[#5C4033] text-lg">{msg.recipient}</h3>
                             <span className="text-xs bg-[#F3E1E4] text-[#8B5A2B] px-2 py-0.5 rounded-full font-medium">Dari: {msg.sender}</span>
                             {msg.media_type && (
-                              <span className="text-xs border border-[#D4A5A5] text-[#A47B8E] px-2 py-0.5 rounded-full uppercase">{msg.media_type}</span>
+                              <span className="text-xs border border-[#D4A5A5] text-[#A47B8E] px-2 py-0.5 rounded-full uppercase">
+                                {msg.media_type === 'youtube' ? 'Link / URL' : msg.media_type}
+                              </span>
                             )}
                             {msg.auto_delete ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-600 border border-orange-200">
