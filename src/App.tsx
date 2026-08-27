@@ -9,9 +9,30 @@ function App() {
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    const authStatus = !!localStorage.getItem('adminToken')
-    setIsAuthenticated(authStatus)
-    setIsChecking(false)
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      try {
+        // Decode JWT payload dan cek expiry
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const isExpired = payload.exp * 1000 < Date.now();
+        if (isExpired) {
+          // Token expired → paksa logout
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminEmail');
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        // Token rusak/tidak valid → paksa logout
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        setIsAuthenticated(false);
+      }
+    } else {
+      setIsAuthenticated(false);
+    }
+    setIsChecking(false);
   }, [])
 
   if (isChecking) return null
@@ -24,10 +45,19 @@ function App() {
           path="/" 
           element={
             isAuthenticated ? 
-              <AdminApp onLogout={() => {
-                localStorage.removeItem('adminToken');
-                setIsAuthenticated(false);
-              }} /> : 
+              <AdminApp 
+                onLogout={() => {
+                  localStorage.removeItem('adminToken');
+                  localStorage.removeItem('adminEmail');
+                  setIsAuthenticated(false);
+                }}
+                onSessionExpired={() => {
+                  localStorage.removeItem('adminToken');
+                  localStorage.removeItem('adminEmail');
+                  setIsAuthenticated(false);
+                  alert('Sesi Anda telah berakhir. Silakan login kembali.');
+                }}
+              /> : 
               <Login onLoginSuccess={() => setIsAuthenticated(true)} />
           } 
         />

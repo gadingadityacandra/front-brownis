@@ -13,7 +13,7 @@ interface MessageData {
   admin_email?: string
 }
 
-export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
+export default function AdminApp({ onLogout, onSessionExpired }: { onLogout?: () => void; onSessionExpired?: () => void }) {
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create')
   const [filterAdminEmail, setFilterAdminEmail] = useState<string>('all')
   const currentAdminEmail = localStorage.getItem('adminEmail');
@@ -122,6 +122,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       const response = await fetch(`${apiUrl}/api/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      if (response.status === 401) { onSessionExpired?.(); return; }
       const result = await response.json()
       if (response.ok) {
         setMessagesList(result.data || [])
@@ -170,6 +171,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         body: formData,
       });
 
+      if (response.status === 401) { onSessionExpired?.(); return; }
       const result = await response.json();
 
       if (!response.ok) {
@@ -203,12 +205,13 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     if (!confirm('Apakah Anda yakin ingin menghapus pesanan ini? File media juga akan dihapus dari server.')) return;
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      if (response.status === 401) { onSessionExpired?.(); return; }
       if (response.ok) {
         alert('Berhasil dihapus!')
         fetchMessagesList()
@@ -261,6 +264,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       })
+      if (response.status === 401) { onSessionExpired?.(); return; }
       if (response.ok) {
         alert('Perubahan berhasil disimpan!')
         setEditingId(null)
