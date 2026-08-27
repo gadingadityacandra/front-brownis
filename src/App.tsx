@@ -28,7 +28,7 @@ function App() {
                 localStorage.removeItem('adminToken');
                 setIsAuthenticated(false);
               }} /> : 
-              <Login onLoginSuccess={(token) => setIsAuthenticated(true)} />
+              <Login onLoginSuccess={() => setIsAuthenticated(true)} />
           } 
         />
         
