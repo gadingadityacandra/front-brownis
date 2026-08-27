@@ -29,11 +29,14 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: (token: stri
         throw new Error(data.error || 'Login gagal')
       }
 
-      // Success
+      // Pastikan token benar-benar ada
       const token = data.token;
+      const adminEmailResponse = data.email || email;
       if (!token) throw new Error('Token tidak ditemukan dari server');
       
       localStorage.setItem('adminToken', token)
+      localStorage.setItem('adminEmail', adminEmailResponse)
+      
       onLoginSuccess(token)
     } catch (err: any) {
       setError(err.message)

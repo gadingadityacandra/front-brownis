@@ -10,10 +10,13 @@ interface MessageData {
   media_url: string | null
   auto_delete: boolean
   created_at: string
+  admin_email?: string
 }
 
 export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create')
+  const [filterAdminEmail, setFilterAdminEmail] = useState<string>('all')
+  const currentAdminEmail = localStorage.getItem('adminEmail');
   
   // States for Create
   const [recipient, setRecipient] = useState('')
@@ -334,6 +337,17 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
               </button>
             </div>
 
+            {currentAdminEmail && (
+              <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-white rounded-full shadow-sm border border-[#F3E1E4]">
+                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-[#D4A5A5] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {currentAdminEmail.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[10px] md:text-xs font-medium text-[#5C4033] hidden md:block max-w-[120px] truncate">
+                  {currentAdminEmail}
+                </span>
+              </div>
+            )}
+
             {onLogout && (
               <button
                 onClick={onLogout}
@@ -554,7 +568,25 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
         {activeTab === 'list' && (
           <div className="glass-card p-6 md:p-10 rounded-[2rem] shadow-[0_15px_40px_rgb(92,64,51,0.05)] border border-white/60">
-            <h2 className="text-xl font-bold text-[#5C4033] mb-6">Daftar Pesanan</h2>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h2 className="text-xl font-bold text-[#5C4033]">Daftar Pesanan</h2>
+              
+              <div className="flex items-center gap-2 bg-[#F3E1E4]/30 px-3 py-2 rounded-xl border border-[#F3E1E4]/50">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#A47B8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <select 
+                  value={filterAdminEmail} 
+                  onChange={(e) => setFilterAdminEmail(e.target.value)}
+                  className="bg-transparent text-sm text-[#5C4033] font-medium focus:outline-none cursor-pointer w-full"
+                >
+                  <option value="all">Semua Admin</option>
+                  {Array.from(new Set(messagesList.map(msg => msg.admin_email).filter(Boolean))).map(email => (
+                    <option key={email as string} value={email as string}>{email}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             
             {isLoadingList ? (
               <div className="flex justify-center p-10">
@@ -566,7 +598,9 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
               </div>
             ) : (
               <div className="space-y-4">
-                {messagesList.map((msg) => (
+                {messagesList
+                  .filter(msg => filterAdminEmail === 'all' || msg.admin_email === filterAdminEmail)
+                  .map((msg) => (
                   <div key={msg.id} className="bg-white p-5 rounded-2xl shadow-sm border border-[#F3E1E4] flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                     
                     {editingId === msg.id ? (
@@ -631,7 +665,17 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                             )}
                           </div>
                           <p className="text-sm text-gray-600 line-clamp-2">{msg.message}</p>
-                          <p className="text-xs text-gray-400 mt-2">{new Date(msg.created_at).toLocaleString()}</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <p className="text-xs text-gray-400">{new Date(msg.created_at).toLocaleString()}</p>
+                            {msg.admin_email && (
+                              <p className="text-xs text-[#A47B8E] bg-[#FDFBF7] px-2 py-0.5 rounded-md border border-[#F3E1E4]/50 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Dibuat oleh: {msg.admin_email}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto">
