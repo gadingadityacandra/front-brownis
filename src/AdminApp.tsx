@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
+import { createClient } from '@supabase/supabase-js'
+
+// Supabase client untuk upload langsung dari browser (bypass Vercel 4.5MB limit)
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL || '',
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+)
 
 interface MessageData {
   id: string
@@ -55,7 +62,7 @@ export default function AdminApp({ onLogout, onSessionExpired }: { onLogout?: ()
     }
   }, [activeTab])
 
-  // Auto-upload media file when selected
+  // Auto-upload media file langsung ke Supabase Storage (bypass batas 4.5MB Vercel)
   useEffect(() => {
     if (!mediaFile) {
       setUploadStatus('idle');
@@ -68,51 +75,59 @@ export default function AdminApp({ onLogout, onSessionExpired }: { onLogout?: ()
     setUploadProgress(0);
     setUploadedMediaUrl('');
 
-    const formData = new FormData();
-    formData.append('media_file', mediaFile);
+    let isCancelled = false;
 
-    const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
-    const uploadUrl = `${apiUrl}/api/upload`;
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', uploadUrl);
-    const token = localStorage.getItem('adminToken');
-    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percentComplete);
-      }
-    };
-
-    xhr.onload = () => {
+    const uploadToSupabase = async () => {
       try {
-        const res = JSON.parse(xhr.responseText);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setUploadedMediaUrl(res.url);
-          setUploadStatus('success');
-        } else {
+        const fileExt = mediaFile.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+        // Simulasi progress awal (Supabase JS tidak support progress event)
+        setUploadProgress(10);
+
+        const { data, error } = await supabase
+          .storage
+          .from('media')
+          .upload(fileName, mediaFile, {
+            contentType: mediaFile.type,
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (isCancelled) return;
+
+        if (error) {
+          console.error('Supabase upload error:', error);
           setUploadStatus('error');
-          alert(res.error || 'Gagal mengunggah file media');
+          alert(error.message || 'Gagal mengunggah file media ke Storage');
+          return;
         }
-      } catch (e) {
+
+        setUploadProgress(90);
+
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('media')
+          .getPublicUrl(data.path);
+
+        setUploadedMediaUrl(publicUrlData.publicUrl);
+        setUploadProgress(100);
+        setUploadStatus('success');
+      } catch (err: any) {
+        if (isCancelled) return;
+        console.error('Upload error:', err);
         setUploadStatus('error');
-        alert('Response dari server tidak valid saat mengunggah');
+        alert(err.message || 'Terjadi kesalahan saat mengunggah file');
       }
     };
 
-    xhr.onerror = () => {
-      setUploadStatus('error');
-      alert('Terjadi kesalahan jaringan saat mengunggah file');
-    };
-
-    xhr.send(formData);
+    uploadToSupabase();
 
     return () => {
-      xhr.abort();
+      isCancelled = true;
     };
   }, [mediaFile]);
+
 
   const fetchMessagesList = async () => {
     setIsLoadingList(true)
