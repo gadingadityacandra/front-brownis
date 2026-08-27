@@ -73,6 +73,8 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', uploadUrl);
+    const token = localStorage.getItem('adminToken');
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -113,7 +115,10 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     setIsLoadingList(true)
     try {
       const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
-      const response = await fetch(`${apiUrl}/api/messages`)
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${apiUrl}/api/messages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       const result = await response.json()
       if (response.ok) {
         setMessagesList(result.data || [])
@@ -154,9 +159,11 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
 
       const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
       const backendUrl = `${apiUrl}/api/messages`;
+      const token = localStorage.getItem('adminToken');
       
       const response = await fetch(backendUrl, {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
 
@@ -194,8 +201,10 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${apiUrl}/api/messages/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
       })
       if (response.ok) {
         alert('Berhasil dihapus!')
@@ -243,8 +252,10 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
       }
 
       const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${apiUrl}/api/messages/${id}`, {
         method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       })
       if (response.ok) {

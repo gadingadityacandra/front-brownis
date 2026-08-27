@@ -9,7 +9,7 @@ function App() {
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAdmin') === 'true'
+    const authStatus = !!localStorage.getItem('adminToken')
     setIsAuthenticated(authStatus)
     setIsChecking(false)
   }, [])
@@ -25,10 +25,10 @@ function App() {
           element={
             isAuthenticated ? 
               <AdminApp onLogout={() => {
-                localStorage.removeItem('isAdmin');
+                localStorage.removeItem('adminToken');
                 setIsAuthenticated(false);
               }} /> : 
-              <Login onLoginSuccess={() => setIsAuthenticated(true)} />
+              <Login onLoginSuccess={(token) => setIsAuthenticated(true)} />
           } 
         />
         

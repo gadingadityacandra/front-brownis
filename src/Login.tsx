@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
-  const [username, setUsername] = useState('')
+export default function Login({ onLoginSuccess }: { onLoginSuccess: (token: string) => void }) {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +20,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
       })
 
       const data = await response.json()
@@ -30,8 +30,11 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
       }
 
       // Success
-      localStorage.setItem('isAdmin', 'true')
-      onLoginSuccess()
+      const token = data.token;
+      if (!token) throw new Error('Token tidak ditemukan dari server');
+      
+      localStorage.setItem('adminToken', token)
+      onLoginSuccess(token)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -66,13 +69,13 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-[#5C4033] mb-2">Username</label>
+              <label className="block text-sm font-bold text-[#5C4033] mb-2">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-4 rounded-2xl border-2 border-transparent bg-white/50 focus:bg-white focus:border-[#D4A5A5] outline-none transition-all text-[#5C4033] font-medium placeholder:text-[#A47B8E]/50"
-                placeholder="Masukkan username"
+                placeholder="Masukkan email"
                 required
               />
             </div>
