@@ -313,49 +313,51 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
     <div className="min-h-screen bg-[#FDFBF7] text-gray-800 font-sans p-4 md:p-8">
       <div className="max-w-4xl mx-auto animate-fade-in-up">
         
-        <header className="bg-white/70 backdrop-blur-md text-[#5C4033] p-6 rounded-3xl mb-8 shadow-sm border border-white flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
-            <img src="/logo.png" alt="Iam Brownies" className="h-12 md:h-16 w-auto drop-shadow-sm" />
+        <header className="bg-white/70 backdrop-blur-md text-[#5C4033] p-5 md:p-6 rounded-[2rem] md:rounded-3xl mb-6 md:mb-8 shadow-sm border border-white flex flex-col lg:flex-row justify-between items-center gap-5 md:gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left w-full lg:w-auto justify-center lg:justify-start">
+            <img src="/logo.png" alt="Iam Brownies" className="h-14 md:h-16 w-auto drop-shadow-sm" />
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-              <p className="text-[#A47B8E] font-medium text-sm">iam Brownies • jadi makin sayang </p>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+              <p className="text-[#A47B8E] font-medium text-xs md:text-sm">iam Brownies • jadi makin sayang </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex bg-[#F3E1E4]/50 p-1 rounded-full shadow-inner flex-wrap justify-center">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-center lg:justify-end">
+            <div className="flex bg-[#F3E1E4]/50 p-1 rounded-full shadow-inner w-full sm:w-auto justify-center">
               <button 
                 onClick={() => setActiveTab('create')}
-                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${activeTab === 'create' ? 'bg-white text-[#5C4033] shadow-sm' : 'text-[#A47B8E] hover:text-[#5C4033]'}`}
+                className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${activeTab === 'create' ? 'bg-white text-[#5C4033] shadow-sm' : 'text-[#A47B8E] hover:text-[#5C4033]'}`}
               >
-                Buat Pesanan Baru
+                Buat Pesanan
               </button>
               <button 
                 onClick={() => setActiveTab('list')}
-                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${activeTab === 'list' ? 'bg-white text-[#5C4033] shadow-sm' : 'text-[#A47B8E] hover:text-[#5C4033]'}`}
+                className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 ${activeTab === 'list' ? 'bg-white text-[#5C4033] shadow-sm' : 'text-[#A47B8E] hover:text-[#5C4033]'}`}
               >
                 Daftar Pesanan
               </button>
             </div>
 
-            {currentAdminEmail && (
-              <div className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white rounded-full shadow-sm border border-[#F3E1E4] cursor-help transition-all hover:scale-105" title={currentAdminEmail}>
-                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#D4A5A5] flex items-center justify-center text-white text-sm font-bold">
-                  {currentAdminEmail.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-3 shrink-0">
+              {currentAdminEmail && (
+                <div className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white rounded-full shadow-sm border border-[#F3E1E4] cursor-help transition-all hover:scale-105" title={currentAdminEmail}>
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#D4A5A5] flex items-center justify-center text-white text-sm font-bold">
+                    {currentAdminEmail.charAt(0).toUpperCase()}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {onLogout && (
-              <button
-                onClick={onLogout}
-                title="Keluar"
-                className="p-2 md:p-2.5 rounded-full bg-white text-[#A47B8E] hover:text-[#E1306C] hover:bg-[#F3E1E4] shadow-sm transition-colors border border-white/60"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
-            )}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Keluar"
+                  className="p-2 md:p-2.5 rounded-full bg-white text-[#A47B8E] hover:text-[#E1306C] hover:bg-[#F3E1E4] shadow-sm transition-colors border border-white/60"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
