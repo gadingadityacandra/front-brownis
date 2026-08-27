@@ -667,12 +667,12 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                           <div className="flex items-center gap-3 mt-2">
                             <p className="text-xs text-gray-400">{new Date(msg.created_at).toLocaleString()}</p>
                             {msg.admin_email && (
-                              <p className="text-xs text-[#A47B8E] bg-[#FDFBF7] px-2 py-0.5 rounded-md border border-[#F3E1E4]/50 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                Dibuat oleh: {msg.admin_email}
-                              </p>
+                              <div className="flex items-center gap-1.5 pl-3 border-l border-[#F3E1E4]" title={`Dibuat oleh: ${msg.admin_email}`}>
+                                <div className="w-5 h-5 rounded-full bg-[#D4A5A5] flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                                  {msg.admin_email.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-xs font-medium text-[#8B5A2B]">{msg.admin_email.split('@')[0]}</span>
+                              </div>
                             )}
                           </div>
                         </div>
