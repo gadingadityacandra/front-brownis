@@ -92,18 +92,23 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
         if (xhr.status >= 200 && xhr.status < 300) {
           setUploadedMediaUrl(res.url);
           setUploadStatus('success');
+          (window as any).lastUploadError = '';
         } else {
           setUploadStatus('error');
-          alert(res.error || 'Gagal mengunggah file media');
+          const err = res.error || 'Gagal mengunggah file media';
+          (window as any).lastUploadError = err;
+          alert(err);
         }
       } catch (e) {
         setUploadStatus('error');
+        (window as any).lastUploadError = 'Response server tidak valid';
         alert('Response dari server tidak valid saat mengunggah');
       }
     };
 
     xhr.onerror = () => {
       setUploadStatus('error');
+      (window as any).lastUploadError = 'Kesalahan jaringan (CORS/Offline)';
       alert('Terjadi kesalahan jaringan saat mengunggah file');
     };
 
@@ -467,7 +472,7 @@ export default function AdminApp({ onLogout }: { onLogout?: () => void }) {
                                   'text-[#8B5A2B]'
                                 }`}>
                                   <span>
-                                    {uploadStatus === 'error' ? 'Gagal diunggah!' :
+                                    {uploadStatus === 'error' ? (window as any).lastUploadError || 'Gagal diunggah!' :
                                      uploadStatus === 'success' ? 'Sukses Upload File' :
                                      uploadStatus === 'idle' ? 'Menyiapkan...' :
                                      uploadProgress === 100 ? 'Memproses...' : 'Mengunggah...'}
